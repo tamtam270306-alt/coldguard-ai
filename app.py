@@ -7,132 +7,84 @@ import plotly.express as px
 # =========================
 st.set_page_config(
     page_title="COLDGUARD AI",
-    page_icon="🥭",
+    page_icon="❄️",
     layout="wide"
 )
 
 # =========================
-# CSS GIAO DIỆN
+# CSS
 # =========================
 st.markdown("""
 <style>
+    .main {
+        background-color: #f5f7fa;
+    }
 
-html, body, [class*="css"] {
-    font-family: Arial, Helvetica, sans-serif;
-}
+    .header {
+        background: linear-gradient(135deg, #0b1f3a, #164a7b);
+        padding: 28px;
+        border-radius: 14px;
+        color: white;
+        margin-bottom: 25px;
+    }
 
-.main {
-    background-color: #f5f7fa;
-}
+    .header h1 {
+        margin: 0;
+        font-size: 34px;
+    }
 
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
+    .header p {
+        margin-top: 8px;
+        font-size: 16px;
+        opacity: 0.9;
+    }
 
-/* Header */
-.main-header {
-    background: linear-gradient(135deg, #0b1f3a, #123d6a);
-    padding: 28px 32px;
-    border-radius: 14px;
-    margin-bottom: 25px;
-    color: white;
-}
+    .kpi {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
 
-.main-header h1 {
-    margin: 0;
-    font-size: 34px;
-    font-weight: 700;
-}
+    .kpi-title {
+        color: #666;
+        font-size: 14px;
+    }
 
-.main-header p {
-    margin-top: 8px;
-    font-size: 16px;
-    color: #dce8f5;
-}
+    .kpi-value {
+        font-size: 30px;
+        font-weight: bold;
+        color: #0b1f3a;
+    }
 
-/* KPI cards */
-.kpi-card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #e1e7ef;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    text-align: center;
-}
+    .risk-high {
+        color: #d62728;
+        font-weight: bold;
+    }
 
-.kpi-title {
-    color: #667085;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
+    .risk-warning {
+        color: #e6a700;
+        font-weight: bold;
+    }
 
-.kpi-value {
-    color: #0b1f3a;
-    font-size: 30px;
-    font-weight: 700;
-}
-
-/* Section title */
-.section-title {
-    color: #0b1f3a;
-    font-size: 22px;
-    font-weight: 700;
-    margin-top: 20px;
-    margin-bottom: 12px;
-}
-
-/* Risk boxes */
-.risk-high {
-    background-color: #fff1f0;
-    border-left: 6px solid #d92d20;
-    padding: 18px;
-    border-radius: 8px;
-}
-
-.risk-warning {
-    background-color: #fffaeb;
-    border-left: 6px solid #f79009;
-    padding: 18px;
-    border-radius: 8px;
-}
-
-.risk-normal {
-    background-color: #ecfdf3;
-    border-left: 6px solid #12b76a;
-    padding: 18px;
-    border-radius: 8px;
-}
-
-.footer {
-    text-align: center;
-    color: #667085;
-    font-size: 13px;
-    margin-top: 40px;
-}
-
+    .risk-normal {
+        color: #198754;
+        font-weight: bold;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-
 # =========================
-# DỮ LIỆU MÔ PHỎNG
+# HEADER
 # =========================
-data = pd.DataFrame({
-    "Container": ["MG001", "MG002", "MG003", "MG004", "MG005"],
-    "Nhiệt độ (°C)": [4.2, 5.1, 6.3, 4.8, 8.9],
-    "Độ ẩm (%)": [82, 85, 88, 80, 94],
-    "Thời gian chờ (giờ)": [18, 24, 31, 20, 52],
-    "Risk Score": [18, 35, 58, 27, 87],
-    "Phân loại": [
-        "Normal",
-        "Normal",
-        "Warning",
-        "Normal",
-        "High Risk"
-    ]
-})
-
+st.markdown("""
+<div class="header">
+    <h1>❄️ COLDGUARD AI</h1>
+    <p>AI-POWERED COLD CHAIN RISK MANAGEMENT</p>
+    <p>Giám sát và dự báo rủi ro chuỗi lạnh hàng hóa xuất khẩu</p>
+</div>
+""", unsafe_allow_html=True)
 
 # =========================
 # HÀM TÍNH RISK SCORE
@@ -145,7 +97,7 @@ def calculate_risk(temp, humidity, waiting, refrigeration):
     # Nhiệt độ
     if temp > 8:
         score += 35
-        reasons.append("Nhiệt độ vượt ngưỡng bảo quản an toàn")
+        reasons.append("Nhiệt độ vượt ngưỡng an toàn")
     elif temp > 6:
         score += 20
         reasons.append("Nhiệt độ có xu hướng tăng")
@@ -166,330 +118,403 @@ def calculate_risk(temp, humidity, waiting, refrigeration):
         score += 15
         reasons.append("Thời gian chờ tương đối dài")
 
-    # Thiết bị lạnh
+    # Hệ thống làm lạnh
     if refrigeration == "Bất thường":
         score += 20
-        reasons.append("Thiết bị làm lạnh có dấu hiệu bất thường")
+        reasons.append("Hệ thống làm lạnh bất thường")
 
     score = min(score, 100)
 
     if score >= 70:
-        classification = "HIGH RISK"
+        status = "High Risk"
     elif score >= 40:
-        classification = "WARNING"
+        status = "Warning"
     else:
-        classification = "NORMAL"
+        status = "Normal"
 
-    return score, classification, reasons
+    return score, status, reasons
 
 
 # =========================
-# HEADER
+# DỮ LIỆU MẪU
 # =========================
-st.markdown("""
-<div class="main-header">
-    <h1>🥭 COLDGUARD AI</h1>
-    <p>AI-POWERED COLD CHAIN RISK MANAGEMENT</p>
-    <p>Lào Cai International Border Gate • Prototype</p>
-</div>
-""", unsafe_allow_html=True)
+sample_data = pd.DataFrame({
+    "Container": ["MG001", "MG002", "MG003", "MG004", "MG005"],
+    "Nhiệt độ (°C)": [4.2, 5.1, 6.3, 4.8, 8.9],
+    "Độ ẩm (%)": [82, 85, 88, 80, 94],
+    "Thời gian chờ (giờ)": [18, 24, 31, 20, 52],
+    "Làm lạnh": [
+        "Bình thường",
+        "Bình thường",
+        "Bình thường",
+        "Bình thường",
+        "Bất thường"
+    ]
+})
+
+
+# =========================
+# SIDEBAR - DỮ LIỆU
+# =========================
+st.sidebar.header("📂 DỮ LIỆU")
+
+uploaded_file = st.sidebar.file_uploader(
+    "Tải dữ liệu Excel hoặc CSV",
+    type=["csv", "xlsx"]
+)
+
+if uploaded_file is not None:
+
+    try:
+        if uploaded_file.name.endswith(".csv"):
+            data = pd.read_csv(uploaded_file)
+        else:
+            data = pd.read_excel(uploaded_file)
+
+        st.sidebar.success("Đã tải dữ liệu thành công!")
+
+    except Exception as e:
+        st.sidebar.error("Không thể đọc file dữ liệu.")
+        data = sample_data.copy()
+
+else:
+
+    data = sample_data.copy()
+
+    st.sidebar.info(
+        "Đang sử dụng dữ liệu mô phỏng COLDGUARD AI."
+    )
+
+
+# =========================
+# KIỂM TRA / TÍNH TOÁN
+# =========================
+required_columns = [
+    "Container",
+    "Nhiệt độ (°C)",
+    "Độ ẩm (%)",
+    "Thời gian chờ (giờ)",
+    "Làm lạnh"
+]
+
+missing_columns = [
+    col for col in required_columns
+    if col not in data.columns
+]
+
+if missing_columns:
+
+    st.error(
+        "File dữ liệu thiếu các cột: "
+        + ", ".join(missing_columns)
+    )
+
+    st.stop()
+
+
+risk_scores = []
+statuses = []
+
+for _, row in data.iterrows():
+
+    score, status, reasons = calculate_risk(
+        row["Nhiệt độ (°C)"],
+        row["Độ ẩm (%)"],
+        row["Thời gian chờ (giờ)"],
+        row["Làm lạnh"]
+    )
+
+    risk_scores.append(score)
+    statuses.append(status)
+
+data["Risk Score"] = risk_scores
+data["Phân loại"] = statuses
 
 
 # =========================
 # TABS
 # =========================
 tab1, tab2 = st.tabs([
-    "📊 Dashboard",
-    "🥭 Case Study – Xuất khẩu xoài"
+    "📊 DASHBOARD",
+    "🥭 CASE STUDY"
 ])
 
 
-# ==========================================================
-# TAB 1 — DASHBOARD
-# ==========================================================
+# =====================================================
+# DASHBOARD
+# =====================================================
 with tab1:
 
-    st.markdown(
-        '<div class="section-title">Tổng quan rủi ro chuỗi lạnh</div>',
-        unsafe_allow_html=True
-    )
+    st.subheader("📊 Tổng quan rủi ro chuỗi lạnh")
 
     total = len(data)
-    normal = len(data[data["Phân loại"] == "Normal"])
-    warning = len(data[data["Phân loại"] == "Warning"])
-    high = len(data[data["Phân loại"] == "High Risk"])
-    average = round(data["Risk Score"].mean(), 1)
+
+    normal = len(
+        data[data["Phân loại"] == "Normal"]
+    )
+
+    warning = len(
+        data[data["Phân loại"] == "Warning"]
+    )
+
+    high = len(
+        data[data["Phân loại"] == "High Risk"]
+    )
+
+    avg_risk = data["Risk Score"].mean()
 
     # KPI
     c1, c2, c3, c4, c5 = st.columns(5)
 
     with c1:
-        st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-title">Tổng container</div>
-            <div class="kpi-value">{total}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("📦 Tổng Container", total)
 
     with c2:
-        st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-title">Normal</div>
-            <div class="kpi-value">{normal}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("🟢 Normal", normal)
 
     with c3:
-        st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-title">Warning</div>
-            <div class="kpi-value">{warning}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("🟡 Warning", warning)
 
     with c4:
-        st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-title">High Risk</div>
-            <div class="kpi-value">{high}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("🔴 High Risk", high)
 
     with c5:
-        st.markdown(f"""
-        <div class="kpi-card">
-            <div class="kpi-title">Risk Score TB</div>
-            <div class="kpi-value">{average}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            "⚠️ Risk Score TB",
+            f"{avg_risk:.1f}"
+        )
 
-    st.write("")
+    st.divider()
 
     # =========================
     # BIỂU ĐỒ
     # =========================
+
     col1, col2 = st.columns(2)
 
     with col1:
 
-        st.markdown(
-            '<div class="section-title">Risk Score theo container</div>',
-            unsafe_allow_html=True
-        )
+        st.subheader("📈 Risk Score theo Container")
 
-        fig_bar = px.bar(
+        chart = px.bar(
             data,
             x="Container",
             y="Risk Score",
             text="Risk Score",
-            labels={
-                "Container": "Container",
-                "Risk Score": "Risk Score"
-            }
+            title="Mức độ rủi ro"
         )
 
-        fig_bar.update_layout(
-            plot_bgcolor="white",
-            paper_bgcolor="white",
-            yaxis=dict(range=[0, 100])
+        chart.update_traces(
+            textposition="outside"
         )
 
-        st.plotly_chart(fig_bar, use_container_width=True)
+        chart.update_layout(
+            yaxis_range=[0, 100]
+        )
+
+        st.plotly_chart(
+            chart,
+            use_container_width=True
+        )
 
     with col2:
 
-        st.markdown(
-            '<div class="section-title">Phân loại rủi ro</div>',
-            unsafe_allow_html=True
+        st.subheader("📊 Phân loại rủi ro")
+
+        status_count = (
+            data["Phân loại"]
+            .value_counts()
+            .reset_index()
         )
 
-        risk_count = data["Phân loại"].value_counts().reset_index()
-        risk_count.columns = ["Phân loại", "Số lượng"]
+        status_count.columns = [
+            "Phân loại",
+            "Số lượng"
+        ]
 
-        fig_pie = px.pie(
-            risk_count,
+        pie = px.pie(
+            status_count,
             names="Phân loại",
             values="Số lượng",
             hole=0.45
         )
 
-        fig_pie.update_layout(
-            paper_bgcolor="white"
+        st.plotly_chart(
+            pie,
+            use_container_width=True
         )
 
-        st.plotly_chart(fig_pie, use_container_width=True)
+    # =========================
+    # BẢNG XẾP HẠNG
+    # =========================
 
-    # =========================
-    # BẢNG GIÁM SÁT
-    # =========================
-    st.markdown(
-        '<div class="section-title">Danh sách container đang giám sát</div>',
-        unsafe_allow_html=True
-    )
+    st.subheader("🏆 Xếp hạng Container theo mức độ rủi ro")
+
+    ranking = data.sort_values(
+        "Risk Score",
+        ascending=False
+    ).reset_index(drop=True)
+
+    ranking.index = ranking.index + 1
 
     st.dataframe(
-        data,
-        use_container_width=True,
-        hide_index=True
+        ranking,
+        use_container_width=True
+    )
+
+    # Container nguy hiểm nhất
+    highest = ranking.iloc[0]
+
+    st.warning(
+        f"⚠️ Container cần ưu tiên xử lý: "
+        f"**{highest['Container']}** "
+        f"— Risk Score **{highest['Risk Score']}** "
+        f"— {highest['Phân loại']}"
     )
 
 
-# ==========================================================
-# TAB 2 — CASE STUDY
-# ==========================================================
+# =====================================================
+# CASE STUDY
+# =====================================================
 with tab2:
 
-    st.markdown(
-        '<div class="section-title">Mô phỏng: 01 container xoài xuất khẩu</div>',
-        unsafe_allow_html=True
+    st.subheader(
+        "🥭 Case Study – Xuất khẩu xoài tại cửa khẩu Lào Cai"
     )
 
     st.write(
-        "Nhập các thông số thực tế của container để mô phỏng "
-        "cơ chế đánh giá rủi ro chuỗi lạnh."
+        "Nhập thông số container để COLDGUARD AI "
+        "mô phỏng đánh giá rủi ro."
     )
 
     col1, col2 = st.columns(2)
 
     with col1:
 
+        container_id = st.text_input(
+            "Mã Container",
+            "MG006"
+        )
+
         temperature = st.number_input(
             "🌡️ Nhiệt độ (°C)",
             min_value=0.0,
             max_value=20.0,
-            value=8.9,
+            value=8.0,
             step=0.1
         )
 
         humidity = st.number_input(
             "💧 Độ ẩm (%)",
-            min_value=0,
-            max_value=100,
-            value=94,
-            step=1
+            min_value=0.0,
+            max_value=100.0,
+            value=90.0,
+            step=1.0
         )
 
     with col2:
 
         waiting = st.number_input(
             "⏱️ Thời gian chờ (giờ)",
-            min_value=0,
-            max_value=200,
-            value=52,
-            step=1
+            min_value=0.0,
+            max_value=200.0,
+            value=48.0,
+            step=1.0
         )
 
         refrigeration = st.selectbox(
-            "❄️ Tình trạng thiết bị lạnh",
-            ["Bình thường", "Bất thường"]
+            "❄️ Trạng thái làm lạnh",
+            [
+                "Bình thường",
+                "Bất thường"
+            ]
         )
 
-    st.write("")
-
-    analyze = st.button(
+    if st.button(
         "🔍 PHÂN TÍCH RỦI RO",
         use_container_width=True
-    )
+    ):
 
-    if analyze:
-
-        score, classification, reasons = calculate_risk(
+        score, status, reasons = calculate_risk(
             temperature,
             humidity,
             waiting,
             refrigeration
         )
 
-        st.markdown("---")
+        st.divider()
 
-        # =========================
-        # KẾT QUẢ
-        # =========================
-        if classification == "HIGH RISK":
+        st.subheader(
+            f"Container {container_id}"
+        )
 
-            st.markdown(f"""
-            <div class="risk-high">
-                <h2>🔴 HIGH RISK</h2>
-                <h3>Risk Score: {score}/100</h3>
-                <p>Container có nguy cơ cao đối với chất lượng hàng hóa.</p>
-            </div>
-            """, unsafe_allow_html=True)
+        if status == "High Risk":
+            st.error(
+                f"🔴 HIGH RISK — Risk Score: {score}/100"
+            )
 
-        elif classification == "WARNING":
-
-            st.markdown(f"""
-            <div class="risk-warning">
-                <h2>🟠 WARNING</h2>
-                <h3>Risk Score: {score}/100</h3>
-                <p>Container cần được theo dõi và kiểm tra.</p>
-            </div>
-            """, unsafe_allow_html=True)
+        elif status == "Warning":
+            st.warning(
+                f"🟡 WARNING — Risk Score: {score}/100"
+            )
 
         else:
+            st.success(
+                f"🟢 NORMAL — Risk Score: {score}/100"
+            )
 
-            st.markdown(f"""
-            <div class="risk-normal">
-                <h2>🟢 NORMAL</h2>
-                <h3>Risk Score: {score}/100</h3>
-                <p>Container đang trong trạng thái tương đối ổn định.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.write("")
-
-        # =========================
-        # NGUYÊN NHÂN
-        # =========================
-        st.markdown(
-            '<div class="section-title">⚠️ Các yếu tố rủi ro phát hiện</div>',
-            unsafe_allow_html=True
-        )
+        st.write("### 🔎 Nguyên nhân được phát hiện")
 
         if reasons:
-
             for reason in reasons:
                 st.write("• " + reason)
+        else:
+            st.write(
+                "Chưa phát hiện yếu tố rủi ro đáng kể."
+            )
+
+        st.write("### 💡 Khuyến nghị xử lý")
+
+        if status == "High Risk":
+
+            st.write(
+                "• Kiểm tra ngay nguồn điện và hệ thống làm lạnh."
+            )
+
+            st.write(
+                "• Ưu tiên container trong quá trình thông quan."
+            )
+
+            st.write(
+                "• Cân nhắc chuyển hàng vào khu vực bảo quản lạnh phù hợp."
+            )
+
+            st.write(
+                "• Tăng tần suất giám sát nhiệt độ và độ ẩm."
+            )
+
+        elif status == "Warning":
+
+            st.write(
+                "• Tiếp tục theo dõi nhiệt độ và độ ẩm."
+            )
+
+            st.write(
+                "• Kiểm tra thời gian chờ và tình trạng làm lạnh."
+            )
 
         else:
 
-            st.write("Chưa phát hiện yếu tố rủi ro đáng kể.")
-
-        # =========================
-        # KHUYẾN NGHỊ
-        # =========================
-        st.markdown(
-            '<div class="section-title">💡 Khuyến nghị xử lý</div>',
-            unsafe_allow_html=True
-        )
-
-        if classification == "HIGH RISK":
-
-            st.error(
-                "Ưu tiên kiểm tra nguồn điện và thiết bị làm lạnh; "
-                "ưu tiên xử lý container; cân nhắc chuyển hàng vào "
-                "khu vực bảo quản phù hợp; tăng tần suất theo dõi nhiệt độ."
+            st.write(
+                "• Tiếp tục duy trì điều kiện bảo quản hiện tại."
             )
-
-        elif classification == "WARNING":
-
-            st.warning(
-                "Theo dõi sát nhiệt độ và độ ẩm; kiểm tra tình trạng "
-                "thiết bị lạnh; ưu tiên xử lý nếu thời gian chờ tiếp tục tăng."
-            )
-
-        else:
-
-            st.success(
-                "Tiếp tục theo dõi các chỉ số nhiệt độ, độ ẩm và thời gian chờ."
-            )
-
 
 # =========================
 # FOOTER
 # =========================
-st.markdown("""
-<div class="footer">
-    COLDGUARD AI • Cold Chain Risk Management Prototype<br>
-    Phục vụ mục đích mô phỏng và minh họa mô hình
-</div>
-""", unsafe_allow_html=True)
+st.divider()
+
+st.caption(
+    "COLDGUARD AI | Prototype mô phỏng quản trị rủi ro chuỗi lạnh | "
+    "Dữ liệu phục vụ mục đích nghiên cứu và trình diễn."
+)
